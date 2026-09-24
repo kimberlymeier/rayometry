@@ -104,11 +104,11 @@ check('Inspect Show all angles includes every normal and restores selected-only 
  for(const key of ['normal','angles']){$(key).checked=false;$(key).onchange({target:$(key)});}
  $('inspect').onclick();assert(!$('show-all-angles').hidden);
  const normals=()=>($('board').innerHTML.match(/class="normal"/g)||[]).length;
- assert.equal(normals(),1);$('show-all-angles').onclick();assert.equal(normals(),2);
+ assert.equal(normals(),0);$('show-all-angles').onclick();assert.equal(normals(),2);
  assert.equal($('show-all-angles').attrs['aria-pressed'],'true');
  $('board').handlers.pointerdown({target:{closest:s=>s==='[data-hit]'?{dataset:{ray:'0',hit:'1'}}:null}});assert.equal(normals(),2);assert.equal($('readout-title').textContent,'Surface 2 · ray 1');
  $('show-all-angles').onclick();assert.equal(normals(),1);
- $('edit').onclick();assert($('show-all-angles').hidden);assert.equal(normals(),0);assert(!$('normal').checked&&!$('angles').checked);
+ $('edit').onclick();assert($('show-all-angles').hidden);assert.equal(normals(),1);assert($('normal').checked&&$('angles').checked);
  change('ray-count',5);$('inspect').onclick();$('show-all-angles').onclick();assert.equal(normals(),10);
  $('reset').onclick();assert($('show-all-angles').hidden);assert.equal($('show-all-angles').attrs['aria-pressed'],'false');
 });
@@ -162,5 +162,21 @@ check('Bench tool buttons toggle independently and protractor works while Inspec
  toolDrag('rotate',549,300,400,449);assert($('board').innerHTML.includes('translate(400 300) rotate(90)'));assert.deepEqual(sourcePose(),source);
  $('show-protractor').onclick();assert(!$('board').innerHTML.includes('class="protractor-overlay"'));$('show-protractor').onclick();assert($('board').innerHTML.includes('translate(400 300) rotate(90)'));
  $('reset').onclick();assert.equal($('show-protractor').attrs['aria-pressed'],'false');
+});
+check('Inspect can hide all ray angles and normals while keeping checkboxes authoritative',()=>{
+ $('reset').onclick();assert($('hide-all-angles').hidden);$('inspect').onclick();$('show-all-angles').onclick();$('hide-all-angles').onclick();
+ assert.equal($('hide-all-angles').attrs['aria-pressed'],'true');assert(!$('board').innerHTML.includes('class="normal"'));assert(!$('board').innerHTML.includes('i 50.0°'));
+ assert($('readout').innerHTML.includes('50.0°'));
+ $('board').handlers.pointerdown({target:{closest:s=>s==='[data-hit]'?{dataset:{ray:'0',hit:'1'}}:null}});assert(!$('board').innerHTML.includes('class="normal"'));
+ $('show-all-angles').onclick();assert.equal(($('board').innerHTML.match(/class="normal"/g)||[]).length,2);
+ $('hide-all-angles').onclick();$('edit').onclick();assert($('hide-all-angles').hidden);assert(!$('board').innerHTML.includes('class="normal"'));assert(!$('normal').checked&&!$('angles').checked);
+ $('reset').onclick();
+});
+check('Hide-all unchecks controls and each annotation can be restored independently',()=>{
+ $('reset').onclick();$('inspect').onclick();$('showDeviation').checked=true;$('showDeviation').onchange({target:$('showDeviation')});$('hide-all-angles').onclick();
+ assert(!$('normal').checked&&!$('angles').checked&&!$('showDeviation').checked);
+ $('normal').checked=true;$('normal').onchange({target:$('normal')});assert($('board').innerHTML.includes('class="normal"'));assert(!$('board').innerHTML.includes('i 50.0°'));assert.equal($('hide-all-angles').attrs['aria-pressed'],'false');
+ $('normal').checked=false;$('normal').onchange({target:$('normal')});$('angles').checked=true;$('angles').onchange({target:$('angles')});assert(!$('board').innerHTML.includes('class="normal"'));assert($('board').innerHTML.includes('i 50.0°'));
+ $('show-all-angles').onclick();assert($('normal').checked&&$('angles').checked);$('reset').onclick();
 });
 console.log(checks+' control checks passed (DOM fixture, not browser rendering).');

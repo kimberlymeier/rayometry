@@ -10,7 +10,7 @@ Open **index.html** in a browser. No installation, server, internet connection, 
 - Select one, three, or five parallel rays. For five rays, the middle ray supplies the live first-surface annotations.
 - To rotate around an entry point, select **Surface entry point**. The middle ray’s first intersection becomes the pivot automatically. The source moves around that pivot and stays aimed at it. Rotation stops before the point would cease to be its first hit. Dragging the source keeps its direction fixed and updates the pivot to the new first intersection. Moving/rotating the block also updates the pivot. Only the dropdown (or Reset) changes the rotation mode. If the ray misses the block, reposition it to establish a pivot before rotating. The ray and white handle behave the same in both modes; only the center of rotation changes.
 - Change both refractive indices in Media. Values must be finite and greater than zero.
-- **Inspect** freezes editing. Click any marked intersection to see its normal, angles, and indices. **Edit** restores movement. Normal and angle switches control live annotations; Inspect always reveals both for the chosen interaction.
+- **Inspect** freezes editing. Click any marked intersection to see its normal, angles, and indices. **Edit** restores movement. Normal and angle switches control live annotations; The Normals and Angles checkboxes also control Inspect annotations.
 - All optical angles are measured from the normal. `i` is incidence, `t` is transmission/refraction, and `r` is reflection. These differ from the board orientation control.
 - Reset restores the entire original scene.
 
@@ -52,7 +52,7 @@ Triangular prisms also gently snap within 0.35° of minimum deviation during sou
 
 Use **Minimum deviation** or **Critical angle** in the properties panel to jump to the exact condition. Both buttons keep the middle ray’s current first entry point fixed and preserve the manual rotation dropdown. Critical angle targets the first higher-to-lower index transition on the current path (usually the second face for an external prism source). If the condition cannot be reached on the current faces within the board, the scene is left unchanged and a message explains why.
 
-In **Inspect**, choose **Show all angles** to reveal angles and normals at every traced interaction, for all rays. Click an intersection to keep updating its sidebar readout. **Show selected only** restores the focused view. Returning to Edit restores your original annotation toggles.
+In **Inspect**, choose **Show all angles** to reveal angles and normals at every traced interaction, for all rays. Click an intersection to keep updating its sidebar readout. **Show selected only** restores the focused view. Show all angles checks Normals and Angles; Hide all angles unchecks them (and Deviation). Each checkbox can be re-enabled independently, and its setting carries back to Edit.
 
 The **Deviation δ** checkbox draws an angle arc at the middle ray’s exit point. Its dashed purple reference is parallel to the original incoming ray, so δ measures total change in direction, not an angle to the surface normal. It works in Edit and Inspect for direct two-surface transmitted paths; at minimum deviation the label reads δmin.
 

@@ -39,3 +39,6 @@ svg .curvature-handle{cursor:ew-resize}svg .internal-extension{stroke:#367da4;st
 
 .bench-tools{position:absolute;top:12px;left:12px;z-index:2;display:flex;gap:6px}
 .bench-tools button{padding:8px 12px;box-shadow:0 2px 6px #203b2512}
+
+#hide-all-angles{width:100%;margin-top:7px}
+#hide-all-angles[hidden]{display:none}

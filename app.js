@@ -9,7 +9,7 @@
   function currentEvent(){if(state.mode==='inspect'&&state.inspection)return traces[state.inspection.ray]?.events[state.inspection.hit];return traces[Math.floor(traces.length/2)]?.events[0];}
   function annotation(e){
     if(!e)return '';let out='';const q=e.point,n=e.normal;
-    const showNormal=state.normal||state.mode==='inspect',showAngles=state.angles||state.mode==='inspect';
+    const showNormal=state.normal,showAngles=state.angles;
     if(showNormal)out+=line(P.add(q,P.mul(n,-78)),P.add(q,P.mul(n,78)),'class="normal"');
     if(showAngles){
       const pairs=[[n,P.mul(e.incoming,-1),e.incidence,'i'],[e.tir?n:P.mul(n,-1),e.direction,e.outgoingAngle,e.tir?'r':'t']];
@@ -141,6 +141,8 @@
     $('edit').setAttribute('aria-pressed',edit);$('inspect').setAttribute('aria-pressed',!edit);
     for(const id of ['toolbox-section','properties-section','media-section','try-section'])$(id).hidden=!edit;
     $('inspect-help').hidden=edit;
+    $('hide-all-angles').hidden=edit;
+    $('hide-all-angles').setAttribute('aria-pressed',!state.normal&&!state.angles&&!state.showDeviation);
     $('show-all-angles').hidden=edit;
     $('show-all-angles').setAttribute('aria-pressed',state.showAllAngles);
     $('show-all-angles').textContent=state.showAllAngles?'Show selected only':'Show all angles';
@@ -257,8 +259,9 @@
   $('ray-count').onchange=e=>{state.source.count=+e.target.value;render();};
   $('pivot-mode').onchange=e=>{notice='';state.rotationMode=e.target.value;refreshPivot();render();};
   ['normal','angles','showDeviation','grid','extensions'].forEach(key=>$(key).onchange=e=>{state[key]=e.target.checked;render();});
-  $('show-all-angles').onclick=()=>{if(state.mode!=='inspect')return;state.showAllAngles=!state.showAllAngles;render();};
-  ['edit','inspect'].forEach(mode=>$(mode).onclick=()=>{drag=null;$('controls-panel').scrollTop=0;state.mode=mode;if(mode==='edit')state.showAllAngles=false;state.inspection=mode==='inspect'&&traces[Math.floor(traces.length/2)]?.events[0]?{ray:Math.floor(traces.length/2),hit:0}:null;notice='';render();});
+  $('show-all-angles').onclick=()=>{if(state.mode!=='inspect')return;state.normal=true;state.angles=true;state.showAllAngles=!state.showAllAngles;render();};
+  $('hide-all-angles').onclick=()=>{if(state.mode!=='inspect')return;state.normal=false;state.angles=false;state.showDeviation=false;state.showAllAngles=false;render();};
+  ['edit','inspect'].forEach(mode=>$(mode).onclick=()=>{drag=null;$('controls-panel').scrollTop=0;state.mode=mode;if(mode==='edit'){state.showAllAngles=false;}state.inspection=mode==='inspect'&&traces[Math.floor(traces.length/2)]?.events[0]?{ray:Math.floor(traces.length/2),hit:0}:null;notice='';render();});
   $('reset').onclick=()=>{state=S.defaults();drag=null;notice='';render();};
   render();
 })();
