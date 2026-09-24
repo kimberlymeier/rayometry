@@ -81,3 +81,5 @@ Select the curved block in Edit mode and drag the **gold diamond** at its vertex
 **Ruler** and **Protractor** at the upper-left of the bench toggle independently. Hiding a tool preserves its position; Reset hides both and restores their initial positions. Both tools remain movable in Inspect without moving the optical elements.
 
 For the protractor, drag the center or transparent face to position it. Drag the outer teal handle to rotate its baseline, and the gold arm to read an angle from 0° to 180°. For an incidence or refraction measurement, place the center at the surface intersection and align the baseline with the relevant normal. The tool measures the angle you set; it does not automatically reveal an optical answer.
+
+This tool was designed by Kim Meier and created with Codex.
