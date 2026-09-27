@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>RAYometry · Binocular vision</title><link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="binocular.css"></head>
+<body class="binocular">
+<header><div><h1><strong><span>RAY</span>ometry</strong></h1><p><em>Explore where each eye points and what it sees</em></p></div><div class="header-actions"><nav class="sim-nav" aria-label="Teaching tools"><a href="index.html">Optical Bench</a><a href="binocular.html" aria-current="page">Binocular Vision</a></nav><button id="bv-reset">↺ Reset</button></div></header>
+<main class="bv-layout">
+<div class="bv-side bv-side-left">
+<section class="bv-eye-card" aria-labelledby="bv-left-heading"><h2 id="bv-left-heading">LEFT-EYE VIEW</h2><svg id="bv-left-view" viewBox="0 0 520 290" role="img" aria-label="Left-eye target-plane slice"></svg><div class="bv-eye-caption"><p>Where eye points</p><p id="bv-left-position">Target centered</p></div></section>
+<section class="bv-eye-card bv-retina-card" aria-labelledby="bv-left-retina-heading"><h2 id="bv-left-retina-heading">LEFT RETINA</h2><svg id="bv-left-retina" viewBox="0 0 520 240" role="img" aria-label="Left retinal arc, centered on the fovea"></svg><div class="bv-eye-caption"><p>Fovea</p><p id="bv-left-retina-position">Target on fovea</p></div></section>
+<aside class="bv-controls" aria-label="Target controls"><section><h2>Target</h2><label class="stack" for="bv-x">Left / right position<input id="bv-x" aria-describedby="bv-error" type="number" min="-3" max="3" step="0.1" value="0"></label><label class="stack" for="bv-z">Distance from eyes<input id="bv-z" aria-describedby="bv-error" type="number" min="2" max="10" step="0.1" value="6"></label><p class="help">Arbitrary units. Moving the target keeps both eye directions fixed.</p></section>
+</aside>
+</div>
+<section class="bv-workspace" aria-label="Binocular vision simulator"><div class="toolbar"><h2>World view</h2><div class="toggles"><label><input id="bv-plane" type="checkbox" checked>Target plane</label><label><input id="bv-markers" type="checkbox" checked>Fixation markers</label></div></div>
+<div class="board-wrap"><svg id="bv-world" viewBox="300 0 440 620" role="img" aria-label="Top-down world view. Blue left eye and pink right eye. Use the position and direction controls as an alternative to dragging."></svg></div>
+<p class="bv-hint">The star is the target. Drag the star to move the target. Drag each eye’s circular handle to change where it points. Solid lines show what is foveated; dashed lines show eye direction.</p>
+<section class="bv-prism-controls" aria-labelledby="bv-prism-heading">
+<h2 id="bv-prism-heading">Prism</h2>
+<div class="bv-prism-row"><label for="bv-prism-eye">Placement<select id="bv-prism-eye"><option value="none">None</option><option value="left">Left eye</option><option value="right">Right eye</option></select></label><label for="bv-prism-base">Base<select id="bv-prism-base" disabled><option value="out">Base out</option><option value="in">Base in</option></select></label><label for="bv-prism-power">Amount (Δ)<input id="bv-prism-power" type="number" min="0" max="20" step="0.1" value="0" disabled aria-describedby="bv-prism-error"></label></div>
+<label class="bv-slider-label" for="bv-prism-slider">Prism amount · 0–20 Δ </label><input id="bv-prism-slider" type="range" min="0" max="20" step="0.1" value="0" disabled>
+<p id="bv-prism-error" role="status" aria-live="polite"></p><p id="bv-prism-status" class="help" aria-live="polite">No prism.</p>
+<div id="bv-prism-legend" class="bv-prism-legend" hidden><span class="bv-legend-foveated">Solid · what is foveated</span><span class="bv-legend-axis">Dashed · eye direction</span></div>
+<p class="help">Changing prism amount keeps the eyes and scene fixed.</p>
+</section>
+<p class="bv-hint bv-slice-note">Eye views show the target plane, centered where each eye points. The retina view shows positions of each object on each retina.</p></section>
+<div class="bv-side bv-side-right">
+<section class="bv-eye-card" aria-labelledby="bv-right-heading"><h2 id="bv-right-heading">RIGHT-EYE VIEW</h2><svg id="bv-right-view" viewBox="0 0 520 290" role="img" aria-label="Right-eye target-plane slice"></svg><div class="bv-eye-caption"><p>Where eye points</p><p id="bv-right-position">Target centered</p></div></section>
+<section class="bv-eye-card bv-retina-card" aria-labelledby="bv-right-retina-heading"><h2 id="bv-right-retina-heading">RIGHT RETINA</h2><svg id="bv-right-retina" viewBox="0 0 520 240" role="img" aria-label="Right retinal arc, centered on the fovea"></svg><div class="bv-eye-caption"><p>Fovea</p><p id="bv-right-retina-position">Target on fovea</p></div></section>
+<aside class="bv-controls" aria-label="Eye direction controls"><section><h2>Where each eye points</h2><label class="stack bv-left-label" for="bv-left-angle">Left eye · direction (°)<input id="bv-left-angle" aria-describedby="bv-error" type="number" min="-45" max="45" step="0.1"></label><label class="stack bv-right-label" for="bv-right-angle">Right eye · direction (°)<input id="bv-right-angle" aria-describedby="bv-error" type="number" min="-45" max="45" step="0.1"></label><p class="help">Coordinates are head-centric, such that 0° points straight ahead. Negative turns left; positive turns right.</p></section>
+<section><h2>In each eye’s view</h2><p id="bv-summary" class="help"></p><p id="bv-error" role="status" aria-live="polite"></p></section></aside>
+</div>
+</main><footer>RAYometry <span>Designed by k meier, built with Codex.</span><a href="binocular-tests.html" target="_blank">Geometry checks ↗</a></footer>
+<script src="binocular-geometry.js"></script><script src="binocular-app.js"></script>
+</body></html>

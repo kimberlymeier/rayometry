@@ -83,3 +83,57 @@ Select the curved block in Edit mode and drag the **gold diamond** at its vertex
 For the protractor, drag the center or transparent face to position it. Drag the outer teal handle to rotate its baseline, and the gold arm to read an angle from 0° to 180°. For an incidence or refraction measurement, place the center at the surface intersection and align the baseline with the relevant normal. The tool measures the angle you set; it does not automatically reveal an optical answer.
 
 This tool was designed by Kim Meier and created with Codex.
+
+## Binocular Vision
+
+Open **binocular.html**, or choose **Binocular Vision** in the header. **Optical Bench** returns to the existing bench. Both pages work offline, without installation or a server.
+
+Drag the black star left/right or nearer/farther. Drag the blue left-eye or pink right-eye circular handle to change that eye's direction independently. The labeled numeric controls provide a keyboard alternative. Target movement never turns the eyes automatically. While dragging, eye directions snap to the star’s apparent direction within 1.5°, and the target snaps to horizontal zero within 0.12 schematic units. Continue dragging beyond these thresholds to release. Numeric inputs are never snapped; unreachable fixation outside the ±45° eye range is not snapped. Reset returns both eyes to pointing at the centered target and restores both visibility toggles.
+
+The world view uses a closer framing with larger eyes and a deeper, pale shaded band. Dashed lines continue each visual axis upward beyond the target plane (farther away in world space); no extensions run below the eyes. The world framing follows the target plane, leaving less room above it and more visible separation from the eyes without changing the geometry. The framing widens as needed to keep extreme target-plane intersections visible. The orange target plane passes through the star. Small colored dots mark the fixation intersections. The eye panels show **target-plane slices, centered where each eye points**, at the same spatial scale. They are not angular visual-field displays: increasing target distance does not necessarily move the star toward the panel center. The green/yellow split follows the physical target, matching the supplied teaching PDF. Plane and intersection toggles affect the world view only.
+
+Coordinates use schematic units: x increases rightward and z forward (upward on screen). Eyes stay at x = −1 and +1, z = 0. Target x ranges from −3 to +3 and z from 2 to 10. Eye angles range from −45° to +45° from straight ahead; positive turns right. The default target is (0, 6), with each eye aimed directly at it.
+
+`binocular-geometry.js` is a pure module exposed as `BinocularGeometry` in browsers and through CommonJS in Node. `defaults()` returns fresh state; `bearing(eyeX, target)` returns radians; `evaluateEye(eyeX, angle, target)` and `evaluate(state)` return target-plane intersections, target bearings, signed angular offsets, and slice offsets. For each eye, intersection x = eye x + target z × tan(angle). Without a prism, panel displacement = target x − intersection x; with a prism, use the apparent target-plane position instead. Negative displacement appears left, positive right. Geometry has no DOM or bench-engine dependency. `binocular-app.js` handles controls and SVG rendering; `binocular.css` scopes the new layout.
+
+### Binocular checks
+
+Open **binocular-tests.html** or run `node binocular-tests.js`. Run `node binocular-tests-controls.cjs` for control-handler checks. Existing bench checks remain `node tests.js` and `node tests-controls.cjs`. Control fixtures do not replace browser visual verification.
+
+With eyes at (−1, 0), (+1, 0), target at (0, 6), aim at the following points:
+
+| Left eye aims at | Right eye aims at | Left-eye target | Right-eye target | Slice offsets (left, right) |
+| --- | --- | --- | --- | --- |
+| (0, 6) | (0, 6) | Center | Center | 0, 0 |
+| (0, 6) | (0, 3) | Center | Right | 0, +1 |
+| (0, 3) | (0, 6) | Left | Center | −1, 0 |
+| (0, 3) | (0, 3) | Left | Right | −1, +1 |
+| (0, 9) | (0, 9) | Right | Left | +⅓, −⅓ |
+
+The second and fourth fixtures reproduce pages 2 and 1, respectively, of “over converged prism example.pdf.” For manual review, use directions ±9.4623° for depth 6, ±18.4349° for depth 3, and ±6.3402° for depth 9 (positive for the left eye, negative for the right). Rounded numeric angles may leave a negligible residual displacement.
+
+Additional tests cover off-center fixation, reflection symmetry, independent eye movement, continuous passage through alignment, finite values at all supported limits, input rejection, pointer cancellation, toggles, and reset. Browser review should include desktop and narrow layouts, keyboard inputs, dragging, extreme positions, and navigation back to the bench.
+
+Each perceptual panel now has a schematic retinal arc beneath it. The fovea stays at the bottom center while the target image moves along the arc as the target or eye direction changes. The retina is shown in eye-fixed top-down coordinates, not as an examiner’s view of the fundus. Its unit-radius position is x = −sin(angular offset), z = −cos(angular offset); thus a target seen right of fixation lands left of the fovea. The visible arc shows a magnified region around the fovea: retinal angular displacements are exaggerated threefold on a drawn ±55° arc, so the actual displayed range is about ±18.3°. Symbols are enlarged for readability; the underlying geometry is unchanged. Images outside it are omitted with directional edge cues; their calculated positions are never clamped. Retinal image placement uses the angular offset with the same fixed threefold display magnification in both eyes, independently of the spatial slice scale above it. This is a schematic directional model, not an anatomical image-size calculation.
+
+Nasal/temporal labels, clinical classification, automatic correction, presets, and practice mode remain deferred.
+
+### Linked scene objects
+
+An apple sits 0.9 schematic units left of the star, and a tree sits 0.9 units right. Dragging the star or entering its position translates all three together on one depth plane. Each object has independently calculated perceptual and retinal positions through `BinocularGeometry.scene(state)`. Eye snapping continues to use the star only, using its apparent direction when a prism is present. The two perceptual slices share a fixed close scale of 100 SVG units per schematic unit. Objects can leave the visible frame and are clipped rather than triggering auto-zoom. The retinal display magnification also stays fixed, preserving changes in retinal spacing with distance.
+
+### Prism exploration
+
+Under the world view, choose **None**, **Left eye**, or **Right eye**, then **Base in** or **Base out** and an amount from **0–20 Δ**. The slider and numeric input update continuously. The slider gently snaps to exact star-on-fovea alignment within 0.35 Δ when the required power is in range for the selected base direction. Continuing past that band releases the snap. Numeric entries remain exact; rounded display values do not round the underlying snapped geometry. Adding a prism starts at zero power. Moving or removing it preserves its settings; Reset removes it and restores zero. Changing prism settings leaves both eye directions and the physical scene unchanged. Only the selected eye’s perceptual and retinal images change.
+
+The purple wedge shows its orientation by its shape, without base/apex text labels. Its lower face and apex stay fixed as amount changes; the other face pivots about the apex. Its width contains the foveal path’s eye-side crossing and stays fixed as prism power changes. Base out points left for the left eye and right for the right eye; base in reverses those directions. Solid blue/pink paths now trace what is foveated: from the eye along its visual axis to the prism, then through the prism to the physical target plane. Dashed blue/pink lines show the unchanged eye direction and continue beyond the target plane. Fixation dots mark the solid path’s target-plane intersections. Without a prism, the two paths coincide up to that plane. No brown object rays or purple apparent-star extension are drawn. The apple and tree remain visible in the scene and image panels. `foveatedPath(state, side)` supplies the world path; tests verify that an object at its intersection lands exactly on the fovea under the same forward prism model.
+
+The model uses an ideal thin angular deflector: deviation = atan(power / 100). It is a conceptual prism-power model, not Snell tracing through a material wedge; wedge thickness is symbolic, and aperture/dispersion are not modeled. The prism lies at schematic depth 1 in front of the selected eye. Each object’s ray crossing is solved so the two segments meet there, reach the eye, and turn toward the base by the specified deviation. The reverse direction of the ray arriving at the eye gives the apparent bearing. Projecting that bearing onto the target plane gives the perceptual slice position; subtracting eye direction and reversing the angle gives the retinal position. The schematic vertex separation is not a clinical measurement or prescription calculation.
+
+`defaults()` now includes `prism: {eye: 'none', base: 'out', power: 0}`. Earlier states without a prism remain supported. `evaluateEye` optionally accepts `{power, baseSign}`; `evaluate` and `scene` resolve placement/base from state. Results retain physical target bearing and pointing intersection, and additionally expose `apparentBearing`, `apparentX`, `prismPoint`, `deviation`, and `physicalSliceOffset`. `sliceOffset` is the perceived displacement. The perceptual panels use fixed magnification, while world framing reserves the full 0–20 Δ envelope; changing prism amount does not move the other eye’s display through auto-zoom.
+
+Prism checks cover all eye/base combinations, exact zero-power equivalence, power conversion, continuous connected light paths, scene and eye invariance, mirror symmetry, extreme inputs, invalid amounts, removal/reset, slider synchronization, and snapping through the prism. A PDF-derived over-converged example is neutralized with base out; an under-converged example is neutralized with base in. Both are calculated from the geometry rather than special display cases.
+
+Optical conventions were checked against the [National Academy of Opticianry’s prism teaching material](https://www.nao.org/wp-content/uploads/2020/11/Not-Your-Basic-Prism.pdf): light bends toward the base and the perceived image shifts toward the apex, consistent with the supplied course PDF. Browser visual review is still required; automated verification here uses geometry and DOM fixtures.
+
+The companion-object spacing is chosen so either apple or tree can reach the fovea within 20 Δ from the default star fixation. Different target distances or eye deviations can require more power; prism-diopter conversion has not been rescaled.

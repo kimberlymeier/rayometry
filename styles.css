@@ -42,3 +42,6 @@ svg .curvature-handle{cursor:ew-resize}svg .internal-extension{stroke:#367da4;st
 
 #hide-all-angles{width:100%;margin-top:7px}
 #hide-all-angles[hidden]{display:none}
+
+.sim-nav{display:flex;gap:4px}.sim-nav a{color:#c2d7cf;text-decoration:none;font-size:12px;padding:10px 12px;border:1px solid transparent;border-radius:7px}.sim-nav a[aria-current=page]{background:#374640;color:#e2f3eb;border-color:#59736a}.sim-nav a:hover{background:#374640}.sim-nav a:focus-visible{outline:3px solid #e3ad51;outline-offset:3px}
+@media(max-width:700px){header{height:auto;flex-wrap:wrap;gap:14px}.header-actions{gap:10px;flex-wrap:wrap}.sim-nav a{padding:8px;font-size:11px}}
