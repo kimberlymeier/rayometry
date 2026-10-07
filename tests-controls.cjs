@@ -22,17 +22,17 @@ check('Stylesheet contains CSS and essential layout/ray rules, not application c
 });
 const initial=$('board').innerHTML;
 check('Initial render shows TIR and 50 degrees',()=>assert($('readout').innerHTML.includes('50.0°')&&$('readout').innerHTML.includes('Total internal reflection')));
-check('Source numerical rotation updates rays',()=>{change('orientation',-70);assert($('readout').innerHTML.includes('20.0°'));assert(!$('readout').innerHTML.includes('Total internal reflection'));});
+check('Source numerical rotation updates rays',()=>{change('source-orientation',-70);assert($('readout').innerHTML.includes('20.0°'));assert(!$('readout').innerHTML.includes('Total internal reflection'));});
 check('Index edit and invalid-value preservation',()=>{change('block-index',1.6);assert.equal($('block-index').value,1.6);change('block-index',0);assert.equal($('block-index').value,1.6);assert($('message').textContent.includes('previous value'));});
 check('Five-ray toggle changes rendered bundle',()=>{change('ray-count',5);assert.equal($('ray-count').value,5);assert(($('board').innerHTML.match(/class="ray"/g)||[]).length>=10);});
-check('Inspect locks editing and selects later hit',()=>{$('reset').onclick();$('inspect').onclick();assert($('properties').disabled&&$('media').disabled);assert(!$('board').innerHTML.includes('data-rotate'));$('board').handlers.pointerdown({target:{closest:s=>s==='[data-hit]'?{dataset:{ray:'0',hit:'1'}}:null}});assert.equal($('readout-title').textContent,'Surface 2 · ray 1');assert($('readout').innerHTML.includes('40.0°'));});
+check('Inspect locks editing and selects later hit',()=>{$('reset').onclick();$('inspect').onclick();assert($('source-settings').disabled&&$('properties').disabled&&$('media').disabled);assert(!$('board').innerHTML.includes('data-rotate'));$('board').handlers.pointerdown({target:{closest:s=>s==='[data-hit]'?{dataset:{ray:'0',hit:'1'}}:null}});assert.equal($('readout-title').textContent,'Surface 2 · ray 1');assert($('readout').innerHTML.includes('40.0°'));});
 check('Return to Edit restores controls',()=>{$('edit').onclick();assert(!$('properties').disabled&&!$('media').disabled);});
-check('Surface pivot selection and numerical rotation',()=>{change('pivot-mode','surface');assert.equal($('pivot-mode').value,'surface');assert($('board').innerHTML.includes('>Pivot</text>'));change('orientation',-45);assert($('readout').innerHTML.includes('45.0°'));});
+check('Surface pivot selection and numerical rotation',()=>{change('pivot-mode','surface');assert.equal($('pivot-mode').value,'surface');assert($('board').innerHTML.includes('>Pivot</text>'));change('source-orientation',-45);assert($('readout').innerHTML.includes('45.0°'));});
 check('Switch to source pivot releases lock',()=>{change('pivot-mode','source');assert(!$('board').innerHTML.includes('>Pivot</text>'));});
-check('Dragging source moves it outside block',()=>{$('board').handlers.pointerdown({target:{closest:s=>s==='[data-item]'?{dataset:{item:'source'}}:null},clientX:420,clientY:350,pointerId:1});$('board').handlers.pointermove({clientX:150,clientY:350});$('board').handlers.pointerup();change('orientation',0);assert($('readout').innerHTML.includes('1 → 1.5'));});
-check('Block selection, dragging and orientation work',()=>{$('select-block').onclick();assert($('source-properties').hidden);change('orientation',15);assert.equal($('orientation').value,15);$('board').handlers.pointerdown({target:{closest:s=>s==='[data-item]'?{dataset:{item:'block'}}:null},clientX:500,clientY:325,pointerId:2});$('board').handlers.pointermove({clientX:550,clientY:350});$('board').handlers.pointerup();assert($('board').innerHTML.includes('polygon'));});
+check('Dragging source moves it outside block',()=>{$('board').handlers.pointerdown({target:{closest:s=>s==='[data-item]'?{dataset:{item:'source'}}:null},clientX:420,clientY:350,pointerId:1});$('board').handlers.pointermove({clientX:150,clientY:350});$('board').handlers.pointerup();change('source-orientation',0);assert($('readout').innerHTML.includes('1 → 1.5'));});
+check('Block selection, dragging and orientation work',()=>{$('select-block').onclick();assert(!$('source-properties').hidden);change('block-orientation',15);assert.equal($('block-orientation').value,15);$('board').handlers.pointerdown({target:{closest:s=>s==='[data-item]'?{dataset:{item:'block'}}:null},clientX:500,clientY:325,pointerId:2});$('board').handlers.pointermove({clientX:550,clientY:350});$('board').handlers.pointerup();assert($('board').innerHTML.includes('polygon'));});
 check('Normal and angle toggles hide annotations',()=>{for(const id of ['normal','angles']){$(id).checked=false;$(id).onchange({target:$(id)});}assert(!$('board').innerHTML.includes('class="normal"'));assert(!$('board').innerHTML.includes('class="annotation"'));});
-check('Reset exactly restores initial drawing and controls',()=>{$('reset').onclick();assert.equal($('board').innerHTML,initial);assert.equal($('orientation').value,-40);assert.equal($('ray-count').value,1);assert.equal($('block-index').value,1.5);assert($('normal').checked&&$('angles').checked);});
+check('Reset exactly restores initial drawing and controls',()=>{$('reset').onclick();assert.equal($('board').innerHTML,initial);assert.equal($('source-orientation').value,-40);assert.equal($('ray-count').value,1);assert.equal($('block-index').value,1.5);assert($('normal').checked&&$('angles').checked);});
 // Regression checks for persistent rotation mode and actual handle pointer events.
 function sourcePose(){const m=$('board').innerHTML.match(/<g transform="translate\(([^ ]+) ([^)]+)\) rotate\(([^)]+)\)" data-item="source"/);return {x:+m[1],y:+m[2],angle:+m[3]};}
 function firstHit(){const pose=sourcePose(),scene=ctx.BenchScene.defaults();Object.assign(scene.source,{x:pose.x,y:pose.y,angle:pose.angle*Math.PI/180});return ctx.BenchScene.rays(scene)[0].events[0];}
@@ -42,9 +42,9 @@ $('board').handlers.pointerdown({target:{closest:s=>s==='[data-rotate]'?{}:null}
 check('Surface mode survives source click and translation, preserving direction',()=>{$('reset').onclick();change('pivot-mode','surface');const before=firstHit().point;moveSource(0,0);assert.equal($('pivot-mode').value,'surface');moveSource(20,0);assert.equal($('pivot-mode').value,'surface');assert.equal(sourcePose().angle,-40);assert(Math.abs(firstHit().point.x-before.x-20)<1e-6);});
 check('Surface handle rotates about new entry point without jumping',()=>{const hit=firstHit().point,pose=sourcePose();rotateHandle(-5);assert(Math.abs(sourcePose().angle+45)<1e-6);assert(Math.hypot(firstHit().point.x-hit.x,firstHit().point.y-hit.y)<1e-6);assert(Math.hypot(sourcePose().x-pose.x,sourcePose().y-pose.y)>1);assert.equal($('pivot-mode').value,'surface');});
 check('Surface handle remains reliable close to surface',()=>{$('reset').onclick();change('pivot-mode','surface');moveSource(0,-120);const hit=firstHit().point;rotateHandle(-5);assert(Math.abs(sourcePose().angle+45)<1e-6);assert(Math.hypot(firstHit().point.x-hit.x,firstHit().point.y-hit.y)<1e-6);});
-check('Missing surface retains mode and reacquires pivot on return',()=>{moveSource(0,-150);assert.equal($('pivot-mode').value,'surface');assert(!$('board').innerHTML.includes('>Pivot</text>'));const pose=sourcePose();change('orientation',0);assert.equal(sourcePose().angle,pose.angle);moveSource(0,150);assert($('board').innerHTML.includes('>Pivot</text>'));assert.equal($('pivot-mode').value,'surface');});
+check('Missing surface retains mode and reacquires pivot on return',()=>{moveSource(0,-150);assert.equal($('pivot-mode').value,'surface');assert(!$('board').innerHTML.includes('>Pivot</text>'));const pose=sourcePose();change('source-orientation',0);assert.equal(sourcePose().angle,pose.angle);moveSource(0,150);assert($('board').innerHTML.includes('>Pivot</text>'));assert.equal($('pivot-mode').value,'surface');});
 check('Source handle rotates without translating source',()=>{$('reset').onclick();const before=sourcePose();rotateHandle(10);const after=sourcePose();assert.equal(after.x,before.x);assert.equal(after.y,before.y);assert(Math.abs(after.angle+30)<1e-6);});
-check('Block clicks and rotation retain surface mode',()=>{change('pivot-mode','surface');$('select-block').onclick();change('orientation',10);assert.equal($('pivot-mode').value,'surface');$('inspect').onclick();$('edit').onclick();assert.equal($('pivot-mode').value,'surface');$('reset').onclick();assert.equal($('pivot-mode').value,'source');});
+check('Block clicks and rotation retain surface mode',()=>{change('pivot-mode','surface');$('select-block').onclick();change('block-orientation',10);assert.equal($('pivot-mode').value,'surface');$('inspect').onclick();$('edit').onclick();assert.equal($('pivot-mode').value,'surface');$('reset').onclick();assert.equal($('pivot-mode').value,'source');});
 check('Incident ray drag uses the same gesture with either pivot',()=>{
  for(const mode of ['source','surface']){
   $('reset').onclick();change('pivot-mode',mode);
@@ -69,16 +69,16 @@ check('Pointer critical snap highlights grazing ray and releases on continued dr
  move(-48.1);assert($('readout').innerHTML.includes('Critical angle'));assert($('board').innerHTML.includes('class="ray critical-ray"'));assert($('board').innerHTML.includes('θc'));
  for(const angle of [-48.2,-48.3,-48.4,-48.5,-48.6])move(angle);
  assert(!$('readout').innerHTML.includes('Critical angle'));assert(Math.abs(sourcePose().angle+48.6)<1e-6);
- $('board').handlers.pointerup();change('orientation',-48.1);assert(Math.abs(sourcePose().angle+48.1)<1e-6);$('reset').onclick();
+ $('board').handlers.pointerup();change('source-orientation',-48.1);assert(Math.abs(sourcePose().angle+48.1)<1e-6);$('reset').onclick();
 });
 check('Inspect prioritizes readout, highlights selection, and restores Edit sections',()=>{
  $('reset').onclick();$('inspect').onclick();
- for(const id of ['toolbox-section','properties-section','media-section','try-section'])assert($(id).hidden);
+ for(const id of ['source-panel','toolbox-section','properties-section','media-section','try-section'])assert($(id).hidden);
  assert(!$('inspect-help').hidden);assert.equal($('readout-title').textContent,'Surface 1 · ray 1');
  assert($('board').innerHTML.includes('class="selected-intersection"'));
  $('board').handlers.pointerdown({target:{closest:s=>s==='[data-hit]'?{dataset:{ray:'0',hit:'1'}}:null}});
  assert.equal($('readout-title').textContent,'Surface 2 · ray 1');
- $('edit').onclick();for(const id of ['toolbox-section','properties-section','media-section','try-section'])assert(!$(id).hidden);
+ $('edit').onclick();for(const id of ['source-panel','toolbox-section','properties-section','media-section','try-section'])assert(!$(id).hidden);
  assert($('inspect-help').hidden);assert(!$('board').innerHTML.includes('class="selected-intersection"'));
  assert.equal($('readout-title').textContent,'First surface');
 });
@@ -123,33 +123,33 @@ check('Deviation toggle draws its reference and angle in Edit and Inspect',()=>{
 });
 check('Semicircle preset offers three rays, curved outline and inspect normals',()=>{
  $('reset').onclick();change('shape-preset','semicircle');assert.equal($('ray-count').value,3);assert.equal($('material-name').textContent,'Semicircle');assert($('board').innerHTML.includes('A 150 150'));assert($('place-minimum').disabled);
- $('select-block').onclick();assert.equal($('selected-title').textContent,'Semicircular block');change('orientation',180);
+ $('select-block').onclick();assert.equal($('selected-title').textContent,'Semicircular block');change('block-orientation',180);
  $('inspect').onclick();$('show-all-angles').onclick();assert.equal(($('board').innerHTML.match(/class="normal"/g)||[]).length,6);
  $('edit').onclick();change('shape-preset','prism45');assert(!$('board').innerHTML.includes('A 150 150'));$('reset').onclick();assert.equal($('board').innerHTML,initial);
 });
 check('Gold curvature handle changes geometry in local coordinates and hides in Inspect',()=>{
  $('reset').onclick();change('shape-preset','semicircle');$('select-block').onclick();assert($('board').innerHTML.includes('data-curvature'));
  function dragCurve(x,y,toX,toY){$('board').handlers.pointerdown({target:{closest:s=>s==='[data-curvature]'?{}:null},clientX:x,clientY:y,pointerId:8});$('board').handlers.pointermove({clientX:toX,clientY:toY});$('board').handlers.pointerup();}
- dragCurve(600,325,525,325);assert($('board').innerHTML.includes('A 187.5 187.5'));assert($('block-properties').textContent.includes('37.50 mm'));assert.equal($('selected-title').textContent,'Curved block');
- change('orientation',90);dragCurve(450,400,450,355);assert($('board').innerHTML.includes('A 390 390'));
+ dragCurve(600,325,525,325);assert($('board').innerHTML.includes('A 187.5 187.5'));assert($('block-properties').textContent.includes('56.25 mm'));assert.equal($('selected-title').textContent,'Curved block');
+ change('block-orientation',90);dragCurve(450,400,450,355);assert($('board').innerHTML.includes('A 390 390'));
  $('inspect').onclick();assert(!$('board').innerHTML.includes('data-curvature'));$('edit').onclick();assert($('board').innerHTML.includes('data-curvature'));
  change('shape-preset','semicircle');assert($('board').innerHTML.includes('A 150 150'));assert(!/SRS|Activity|lab:/.test($('try-content').innerHTML));$('reset').onclick();
 });
 check('Millimeter grid, exact radius and extensions update through controls',()=>{
  $('reset').onclick();assert($('grid').checked);assert($('board').innerHTML.includes('20 mm'));
  $('grid').checked=false;$('grid').onchange({target:$('grid')});assert(!$('board').innerHTML.includes('fill="url(#grid)"'));
- change('shape-preset','semicircle');$('select-block').onclick();assert(!$('radius-control').hidden);assert.equal($('radius-mm').value,30);
- change('radius-mm',37.5);assert($('board').innerHTML.includes('A 187.5 187.5'));change('radius-mm',2);assert.equal($('radius-mm').value,37.5);assert($('message').textContent.includes('previous curve'));
- change('radius-mm',30);change('orientation',180);$('extensions').checked=true;$('extensions').onchange({target:$('extensions')});assert.equal(($('board').innerHTML.match(/class="internal-extension"/g)||[]).length,3);
+ change('shape-preset','semicircle');$('select-block').onclick();assert(!$('radius-control').hidden);assert.equal($('radius-mm').value,45);
+ change('radius-mm',56.25);assert($('board').innerHTML.includes('A 187.5 187.5'));change('radius-mm',2);assert.equal($('radius-mm').value,56.25);assert($('message').textContent.includes('previous curve'));
+ change('radius-mm',45);change('block-orientation',180);$('extensions').checked=true;$('extensions').onchange({target:$('extensions')});assert.equal(($('board').innerHTML.match(/class="internal-extension"/g)||[]).length,3);
  $('reset').onclick();assert(!$('extensions').checked&&$('grid').checked);
 });
 check('Ruler snaps to vertex and center, remains draggable in Inspect, and preserves optics',()=>{
- $('reset').onclick();change('shape-preset','semicircle');$('show-ruler').onclick();assert($('board').innerHTML.includes('40.00 mm'));
+ $('reset').onclick();change('shape-preset','semicircle');$('show-ruler').onclick();assert($('board').innerHTML.includes('60.00 mm'));
  $('inspect').onclick();const source=sourcePose();
  function moveEnd(part,x,y){$('board').handlers.pointerdown({target:{closest:s=>s==='[data-ruler]'?{dataset:{ruler:part}}:null},clientX:700,clientY:550,pointerId:9});$('board').handlers.pointermove({clientX:x,clientY:y});$('board').handlers.pointerup();}
- moveEnd('a',451,326);moveEnd('b',602,325);assert.equal($('ruler-reading').textContent,'Distance: 30.00 mm');assert.deepEqual(sourcePose(),source);assert($('properties').disabled);
- $('ruler-snap').checked=false;$('ruler-snap').onchange({target:$('ruler-snap')});moveEnd('b',650,325);assert.equal($('ruler-reading').textContent,'Distance: 40.00 mm');
- moveEnd('body',720,560);assert.equal($('ruler-reading').textContent,'Distance: 40.00 mm');
+ moveEnd('a',451,326);moveEnd('b',602,325);assert.equal($('ruler-reading').textContent,'Distance: 45.00 mm');assert.deepEqual(sourcePose(),source);assert($('properties').disabled);
+ $('ruler-snap').checked=false;$('ruler-snap').onchange({target:$('ruler-snap')});moveEnd('b',650,325);assert.equal($('ruler-reading').textContent,'Distance: 60.00 mm');
+ moveEnd('body',720,560);assert.equal($('ruler-reading').textContent,'Distance: 60.00 mm');
  $('reset').onclick();assert.equal($('show-ruler').attrs['aria-pressed'],'false');assert(!$('board').innerHTML.includes('class="ruler-overlay"'));
 });
 check('Bench tool buttons toggle independently and protractor works while Inspect locks optics',()=>{
@@ -178,5 +178,17 @@ check('Hide-all unchecks controls and each annotation can be restored independen
  $('normal').checked=true;$('normal').onchange({target:$('normal')});assert($('board').innerHTML.includes('class="normal"'));assert(!$('board').innerHTML.includes('i 50.0°'));assert.equal($('hide-all-angles').attrs['aria-pressed'],'false');
  $('normal').checked=false;$('normal').onchange({target:$('normal')});$('angles').checked=true;$('angles').onchange({target:$('angles')});assert(!$('board').innerHTML.includes('class="normal"'));assert($('board').innerHTML.includes('i 50.0°'));
  $('show-all-angles').onclick();assert($('normal').checked&&$('angles').checked);$('reset').onclick();
+});
+check('Separate controls target their own object regardless of bench selection',()=>{
+ $('reset').onclick();$('select-block').onclick();
+ change('source-orientation',-60);assert(Math.abs(sourcePose().angle+60)<1e-6);assert.equal($('block-orientation').value,0);
+ $('select-source').onclick();change('block-orientation',15);
+ assert(Math.abs(sourcePose().angle+60)<1e-6);assert.equal($('block-orientation').value,15);
+ assert(!$('source-panel').hidden&&!$('properties-section').hidden&&!$('source-properties').hidden);
+ change('shape-preset','semicircle');$('select-source').onclick();assert(!$('radius-control').hidden);
+ $('reset').onclick();
+ const html=fs.readFileSync(root+'index.html','utf8'),ids=[...html.matchAll(/id="([^"]+)"/g)].map(m=>m[1]);
+ assert.equal(ids.length,new Set(ids).size);
+ for(const id of elements.keys())assert(ids.includes(id),'Missing HTML control: '+id);
 });
 console.log(checks+' control checks passed (DOM fixture, not browser rendering).');

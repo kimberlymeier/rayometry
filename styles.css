@@ -45,3 +45,29 @@ svg .curvature-handle{cursor:ew-resize}svg .internal-extension{stroke:#367da4;st
 
 .sim-nav{display:flex;gap:4px}.sim-nav a{color:#c2d7cf;text-decoration:none;font-size:12px;padding:10px 12px;border:1px solid transparent;border-radius:7px}.sim-nav a[aria-current=page]{background:#374640;color:#e2f3eb;border-color:#59736a}.sim-nav a:hover{background:#374640}.sim-nav a:focus-visible{outline:3px solid #e3ad51;outline-offset:3px}
 @media(max-width:700px){header{height:auto;flex-wrap:wrap;gap:14px}.header-actions{gap:10px;flex-wrap:wrap}.sim-nav a{padding:8px;font-size:11px}}
+
+/* Keep both sets of bench controls available without switching selections. */
+.optical-layout{grid-template-columns:205px minmax(0,1fr) 265px;gap:16px;padding:24px 20px 8px}
+.optical-layout>.bench-area{grid-column:2;grid-row:1}
+.optical-layout>#source-panel{grid-column:1;grid-row:1}
+.optical-layout>#controls-panel{grid-column:3;grid-row:1}
+.optical-layout>aside{display:block;align-self:start;position:sticky;top:18px;max-height:calc(100vh - 148px);max-height:calc(100dvh - 148px);overflow-y:auto;overscroll-behavior-y:contain;scrollbar-gutter:stable}
+.optical-layout>aside[hidden]{display:none}
+.optical-layout aside section{padding:15px}
+.optical-layout select{min-width:0;max-width:100%}
+.optical-layout #board{min-height:0;aspect-ratio:1000/650}
+.optical-layout .bench-footer{flex-wrap:wrap;gap:8px}
+.optical-layout .bench-footer span:last-child{white-space:normal}
+#source-panel:focus-visible{outline:2px solid #8fd0be;outline-offset:3px}
+@media(max-width:1000px){
+ .optical-layout{grid-template-columns:minmax(0,1fr) minmax(0,1fr);padding:18px}
+ .optical-layout>.bench-area{grid-column:1 / -1;grid-row:1}
+ .optical-layout>#source-panel{grid-column:1;grid-row:2}
+ .optical-layout>#controls-panel{grid-column:2;grid-row:2}
+ .optical-layout>aside{position:static;max-height:60vh}
+}
+@media(max-width:550px){
+ .optical-layout{grid-template-columns:minmax(0,1fr)}
+ .optical-layout>#controls-panel{grid-column:1;grid-row:3}
+ .optical-layout>aside{max-height:none}
+}

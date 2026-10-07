@@ -82,7 +82,7 @@
   function render(){
     traces=S.rays(state);const b=state.block,src=state.source,edit=state.mode==='edit',curve=b.shape==='semicircle'?P.curvedGeometry(b):null;
     const corners=P.worldVertices(b),preset=S.presets[b.shape||'rectangle'];
-    let out=`<defs><pattern id="grid" width="25" height="25" patternUnits="userSpaceOnUse"><circle cx="12.5" cy="12.5" r="1.2" fill="#bdcbbb"/></pattern><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M 0 1 L 9 5 L 0 9" fill="none" stroke="#ce8734" stroke-width="1.5"/></marker></defs><rect width="1000" height="650" fill="${state.grid?'url(#grid)':'#fcfdf9'}"/>`;
+    let out=`<defs><pattern id="grid" width="${M.gridStep}" height="${M.gridStep}" patternUnits="userSpaceOnUse"><circle cx="${M.gridStep/2}" cy="${M.gridStep/2}" r="1.2" fill="#bdcbbb"/></pattern><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M 0 1 L 9 5 L 0 9" fill="none" stroke="#ce8734" stroke-width="1.5"/></marker></defs><rect width="1000" height="650" fill="${state.grid?'url(#grid)':'#fcfdf9'}"/>`;
     const materialStyle=`fill="#dcefeb" fill-opacity=".68" stroke="${state.selected==='block'&&edit?'#16827b':'#80aaa3'}" stroke-width="2" data-item="block" class="${edit?'movable':''}"`;
     if(b.shape==='semicircle'){
       out+=`<path d="M 0 ${-curve.halfHeight} A ${curve.radius} ${curve.radius} 0 0 1 0 ${curve.halfHeight} Z" transform="translate(${b.x} ${b.y}) rotate(${deg(b.angle)})" ${materialStyle}/>`;
@@ -127,9 +127,10 @@
       out+=circle(tip,18,'fill="transparent" data-curvature="true" class="curvature-handle"');
       out+=`<path d="M ${tip.x} ${tip.y-9} L ${tip.x+9} ${tip.y} L ${tip.x} ${tip.y+9} L ${tip.x-9} ${tip.y} Z" fill="#e8b759" stroke="#78501a" stroke-width="2" data-curvature="true" class="curvature-handle"/>`;
     }
-    out+=line({x:850,y:615},{x:950,y:615},'stroke="#668176" stroke-width="2" pointer-events="none"');
-    out+=line({x:850,y:610},{x:850,y:620},'stroke="#668176" pointer-events="none"');
-    out+=line({x:950,y:610},{x:950,y:620},'stroke="#668176" pointer-events="none"');
+    const scaleLeft=900-10/M.mmPerUnit,scaleRight=900+10/M.mmPerUnit;
+    out+=line({x:scaleLeft,y:615},{x:scaleRight,y:615},'stroke="#668176" stroke-width="2" pointer-events="none"');
+    out+=line({x:scaleLeft,y:610},{x:scaleLeft,y:620},'stroke="#668176" pointer-events="none"');
+    out+=line({x:scaleRight,y:610},{x:scaleRight,y:620},'stroke="#668176" pointer-events="none"');
     out+='<text x="900" y="638" text-anchor="middle" fill="#587567" font-size="12">20 mm</text>';
     if(state.ruler.visible){
       const targets=M.targets(state,traces);
@@ -139,7 +140,7 @@
     out+=rulerDrawing();
     svg.innerHTML=out;
     $('edit').setAttribute('aria-pressed',edit);$('inspect').setAttribute('aria-pressed',!edit);
-    for(const id of ['toolbox-section','properties-section','media-section','try-section'])$(id).hidden=!edit;
+    for(const id of ['source-panel','toolbox-section','properties-section','media-section','try-section'])$(id).hidden=!edit;
     $('inspect-help').hidden=edit;
     $('hide-all-angles').hidden=edit;
     $('hide-all-angles').setAttribute('aria-pressed',!state.normal&&!state.angles&&!state.showDeviation);
@@ -147,9 +148,9 @@
     $('show-all-angles').setAttribute('aria-pressed',state.showAllAngles);
     $('show-all-angles').textContent=state.showAllAngles?'Show selected only':'Show all angles';
     $('place-minimum').disabled=!edit||!b.vertices||b.index<=state.outsideIndex;
-    $('properties').disabled=!edit;$('media').disabled=!edit;
+    $('source-settings').disabled=!edit;$('properties').disabled=!edit;$('media').disabled=!edit;
     $('select-source').setAttribute('aria-pressed',state.selected==='source');$('select-block').setAttribute('aria-pressed',state.selected==='block');
-    $('selected-title').textContent=state.selected==='source'?'Ray source':curve&&curve.sag<curve.halfHeight?'Curved block':preset.name;
+    $('selected-title').textContent=curve&&curve.sag<curve.halfHeight?'Curved block':preset.name;
     const iconShape=curve?'<path d="M 8 3 A 12 12 0 0 1 8 27 Z"/>':b.vertices?'<path d="M 15 3 L 27 27 H 3 Z"/>':'<rect x="3" y="6" width="24" height="18" rx="1"/>';
     $('object-tool-icon').innerHTML=`<svg viewBox="0 0 30 30" width="30" height="30" fill="currentColor" fill-opacity=".16" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true">${iconShape}</svg>`;
     $('object-tool-name').textContent=b.shape==='semicircle'?'Semicircle':b.vertices?'Prism':'Glass block';
@@ -157,10 +158,10 @@
     $('shape-preset').value=b.shape||'rectangle';
     $('try-content').innerHTML=b.shape==='semicircle'?'<p>Three rays enter the flat face at normal incidence, then converge after the curved face. C marks the center of curvature; A marks the curved vertex.</p><p>Select the block and drag its gold diamond to change curvature. Rotate it 180° to explore curved-face-first refraction.</p>':b.vertices?'<p>Choose Surface entry point to vary incidence at a fixed point. Use Inspect to read each interaction.</p><p>Vary the incident angle to explore emergence, total internal reflection, and minimum deviation. Change the refractive index to compare materials.</p>':'<p>Rotate the source until the light escapes through the upper surface. What changes at the critical angle?</p><p>Then drag the source outside the block to explore refraction on entry and exit.</p>';
     $('block-properties').textContent=curve?`Drag the gold diamond to flatten or round the curved face. Radius: ${M.mm(curve.radius).toFixed(2)} mm. The flat face stays fixed.`:'Drag the optical element or its rotation handle. Its size stays fixed.';
-    $('source-properties').hidden=state.selected!=='source';$('block-properties').hidden=state.selected!=='block';
-    $('radius-control').hidden=state.selected!=='block'||!curve;
+
+    $('radius-control').hidden=!curve;
     if(curve)$('radius-mm').value=Number(M.mm(curve.radius).toFixed(4));
-    $('orientation').value=Number(deg(state[state.selected].angle).toFixed(2));
+    for(const item of ['source','block'])$(item+'-orientation').value=Number(deg(state[item].angle).toFixed(2));
     $('outside-index').value=state.outsideIndex;$('block-index').value=b.index;$('ray-count').value=src.count;
     $('pivot-mode').value=state.rotationMode;
     $('pivot-help').textContent=state.rotationMode==='surface'?(state.pivot?'Drag the source to choose a new entry point. Drag the incident ray or white handle to rotate around the marked point.':'Aim the source at the block to establish an entry point. Rotation needs a surface hit.'):'The source stays in place as its direction changes.';
@@ -172,7 +173,7 @@
     $('extensions').checked=state.extensions;
     $('extensions').disabled=!curve;
     $('extension-help').textContent=state.extensions?(M.extensions(state,traces).length?'Blue dashes extend internal rays beyond the flat exit without refracting again. They are construction lines, not light rays.':'Aim rays at the curved face first, with transmission through the flat exit, to show internal extensions.'):'Extend internal rays through the flat exit to locate where they would converge without exit refraction.';
-    $('ruler-reading').textContent=state.ruler.visible?`Distance: ${M.distance(state.ruler.a,state.ruler.b).toFixed(2)} mm`:'Bench: 200 × 130 mm. Dot spacing: 5 mm.';
+    $('ruler-reading').textContent=state.ruler.visible?`Distance: ${M.distance(state.ruler.a,state.ruler.b).toFixed(2)} mm`:'Bench: 300 × 195 mm. Dot spacing: 5 mm.';
     $('showDeviation').checked=state.showDeviation;
     $('normal').checked=state.normal;$('angles').checked=state.angles;
     $('board-medium').textContent=`Surrounding medium · n = ${state.outsideIndex.toFixed(2)}`;
@@ -246,13 +247,13 @@
   });
   function endDrag(){drag=null;}
   svg.addEventListener('pointerup',endDrag);svg.addEventListener('pointercancel',endDrag);svg.addEventListener('lostpointercapture',endDrag);
-  function changeAngle(angle){if(state.selected==='source'){if(state.rotationMode==='surface'&&!state.pivot){notice='Aim the source at a surface before rotating around an entry point.';return;}if(!S.rotateSource(state,angle))notice='Rotation stopped: keep the selected surface point as the first hit and the source on the board.';}else{const candidate={...state.block,angle};if(S.blockFits(candidate,state))state.block.angle=angle;else notice='Keep the block inside the workspace.';refreshPivot();}}
+  function changeAngle(angle,item=state.selected){if(item==='source'){if(state.rotationMode==='surface'&&!state.pivot){notice='Aim the source at a surface before rotating around an entry point.';return;}if(!S.rotateSource(state,angle))notice='Rotation stopped: keep the selected surface point as the first hit and the source on the board.';}else{const candidate={...state.block,angle};if(S.blockFits(candidate,state))state.block.angle=angle;else notice='Keep the block inside the workspace.';refreshPivot();}}
   ['source','block'].forEach(item=>$('select-'+item).onclick=()=>{state.selected=item;render();});
-  $('radius-mm').onchange=e=>{notice=M.setRadius(state,e.target.valueAsNumber)?'':'Enter a radius from 30 to 78 mm. The previous curve was kept.';render();};
+  $('radius-mm').onchange=e=>{notice=M.setRadius(state,e.target.valueAsNumber)?'':'Enter a radius from 45 to 117 mm. The previous curve was kept.';render();};
   $('show-ruler').onclick=()=>{state.ruler.visible=!state.ruler.visible;drag=null;render();};
   $('show-protractor').onclick=()=>{state.protractor.visible=!state.protractor.visible;drag=null;render();};
   $('ruler-snap').onchange=e=>{state.ruler.snap=e.target.checked;render();};
-  $('orientation').onchange=e=>{const v=e.target.valueAsNumber;notice='';if(Number.isFinite(v))changeAngle(rad(((v%360)+540)%360-180));else notice='Enter a finite orientation.';render();};
+  for(const item of ['source','block'])$(item+'-orientation').onchange=e=>{const v=e.target.valueAsNumber;notice='';if(Number.isFinite(v))changeAngle(rad(((v%360)+540)%360-180),item);else notice='Enter a finite orientation.';render();};
   for(const [id,key]of [['outside-index','outsideIndex'],['block-index','index']])$(id).onchange=e=>{const value=e.target.valueAsNumber;notice='';if(Number.isFinite(value)&&value>0){if(key==='index')state.block.index=value;else state.outsideIndex=value;}else notice='Use a finite refractive index greater than zero. The previous value was kept.';render();};
   for(const [id,kind]of [['place-minimum','minimum'],['place-critical','critical']])$(id).onclick=()=>{const result=S.placeAtSpecialAngle(state,kind);notice=result.message;drag=null;render();};
   $('shape-preset').onchange=e=>{S.applyPreset(state,e.target.value);drag=null;notice='';render();};

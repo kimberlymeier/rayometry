@@ -161,9 +161,9 @@ test('Curvature bounds, rotation and restoration remain exact',()=>{
  const before=JSON.stringify(s);assert(!S.setCurveDepth(s,NaN));assert(JSON.stringify(s)===before);
 });
 test('Physical scale agrees with ruler, grid and radius',()=>{
- close(M.mm(M.gridStep),5);close(M.distance({x:0,y:0},{x:150,y:200}),50);
- const s=S.defaults();S.applyPreset(s,'semicircle');assert(M.setRadius(s,37.5));close(M.mm(P.curvedGeometry(s.block).radius),37.5);
- close(P.curvedGeometry(s.block).sag,75);const before=JSON.stringify(s);for(const bad of [0,29,79,Infinity,NaN])assert(!M.setRadius(s,bad));assert(JSON.stringify(s)===before);
+ close(M.mm(M.gridStep),5);close(M.distance({x:0,y:0},{x:150,y:200}),75);
+ const s=S.defaults();S.applyPreset(s,'semicircle');close(M.mm(P.curvedGeometry(s.block).radius),45);close(M.mm(2*P.curvedGeometry(s.block).halfHeight),90);assert(M.setRadius(s,56.25));close(M.mm(P.curvedGeometry(s.block).radius),56.25);
+ close(P.curvedGeometry(s.block).sag,75);const before=JSON.stringify(s);for(const bad of [0,44,118,Infinity,NaN])assert(!M.setRadius(s,bad));assert(JSON.stringify(s)===before);
 });
 test('Internal extensions continue the pre-exit direction without changing traced rays',()=>{
  const s=S.defaults();S.applyPreset(s,'semicircle');assert(M.extensions(s,S.rays(s)).length===0);s.block.angle=Math.PI;

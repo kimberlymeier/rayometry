@@ -1,7 +1,7 @@
 /* Physical scale and measuring aids. These never change the traced rays. */
 (function(root){
   'use strict';
-  const P=root.Optics,mmPerUnit=.2,gridStep=25;
+  const P=root.Optics,mmPerUnit=.3,gridStep=5/mmPerUnit;
   const mm=distance=>distance*mmPerUnit;
   function distance(a,b){return mm(P.length(P.sub(b,a)));}
   function setRadius(s,radiusMM){
